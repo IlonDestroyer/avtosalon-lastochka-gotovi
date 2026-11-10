@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load cars_extras %}
+
+{% block title %}{{ car.title }} — автоцентр «Ласточка»{% endblock %}
+
+{% block content %}
+<div class="container detail-layout">
+  <div>
+    {% if car.get_image_url %}
+      <img class="detail-img" src="{{ car.get_image_url }}" alt="{{ car.title }}">
+    {% else %}
+      <div class="detail-img" style="display:flex;align-items:center;justify-content:center;color:var(--muted);">Нет фото</div>
+    {% endif %}
+
+    <div class="card" style="margin-top:1rem;">
+      <div class="card-body">
+        <span class="status status-{{ car.status }}">{{ car.get_status_display }}</span>
+        <span class="muted" style="margin-left:0.5rem;">{{ car.year }}</span>
+        <h1 style="font-size:1.75rem;margin:0.5rem 0;">{{ car.title }}</h1>
+        {% if car.description %}
+          <p class="muted" style="margin-bottom:0.75rem;">{{ car.description }}</p>
+        {% endif %}
+        <dl class="specs">
+          <div class="spec"><dt>Год выпуска</dt><dd>{{ car.year }}</dd></div>
+          <div class="spec"><dt>Кузов</dt><dd>{{ car.body }}</dd></div>
+          <div class="spec"><dt>Пробег</dt><dd>{{ car.mileage_km|format_number }} км</dd></div>
+          <div class="spec"><dt>Двигатель</dt><dd>{{ car.fuel }}, {{ car.horsepower }} л.с.</dd></div>
+          <div class="spec"><dt>Коробка</dt><dd>{{ car.transmission }}</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sidebar-card">
+      <div class="muted" style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Стоимость</div>
+      <div class="price-lg">{{ car.price_kzt|format_kzt }}</div>
+      <p class="muted" style="margin:0.5rem 0 1rem;">Бронь на 3 дня, предоплата 500 000 ₸ входит в стоимость покупки.</p>
+
+      {% if user.is_authenticated %}
+        {% if car.status == "available" %}
+        <form method="post" action="{% url 'create_booking' car.slug %}">
+          {% csrf_token %}
+          {{ booking_form.comment }}
+          <button type="submit" class="btn btn-block">Забронировать и перейти к оплате</button>
+        </form>
+        {% elif car.status == "booked" %}
+          <button class="btn btn-block" disabled>Уже забронирован</button>
+        {% else %}
+          <button class="btn btn-block" disabled>Продан</button>
+        {% endif %}
+      {% else %}
+        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-block">Войти, чтобы забронировать</a>
+      {% endif %}
+    </div>
+
+    <div class="sidebar-card">
+      <h3>Запись на тест-драйв</h3>
+      <p class="muted" style="margin-bottom:0.75rem;">Будни 10:00–19:00, суббота 10:00–16:00. Один автомобиль — один слот в час.</p>
+      {% if user.is_authenticated %}
+        {% if car.status != "sold" %}
+        <form method="post" action="{% url 'create_testdrive' car.slug %}">
+          {% csrf_token %}
+          {{ testdrive_form.scheduled_at }}
+          <button type="submit" class="btn btn-secondary btn-block" style="margin-top:0.5rem;">Записаться на тест-драйв</button>
+        </form>
+        {% else %}
+          <button class="btn btn-secondary btn-block" disabled>Недоступно</button>
+        {% endif %}
+      {% else %}
+        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-secondary btn-block">Войти, чтобы записаться</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

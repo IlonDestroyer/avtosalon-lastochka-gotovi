@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load cars_extras %}
+
+{% block title %}Оплата брони — «Ласточка»{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width:480px;padding:2.5rem 1.25rem 3rem;">
+  <div class="card">
+    <div class="card-body">
+      <h1 style="font-size:1.35rem;margin-bottom:0.5rem;">Оплата предоплаты</h1>
+      <p class="muted">{{ booking.car.title }}</p>
+      <p style="margin:1rem 0;font-size:1.4rem;font-weight:600;">{{ booking.deposit_kzt|format_kzt }}</p>
+      <p class="muted" style="margin-bottom:1rem;">Бронь действует до {{ booking.expires_at|date:"d.m.Y H:i" }}</p>
+
+      <form method="post">
+        {% csrf_token %}
+        <div class="field" style="margin-bottom:1rem;">
+          {% for radio in form.method %}
+            <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.4rem;cursor:pointer;">
+              {{ radio.tag }} {{ radio.choice_label }}
+            </label>
+          {% endfor %}
+        </div>
+        <button type="submit" class="btn btn-block">Оплатить</button>
+      </form>
+      <p class="muted" style="margin-top:1rem;font-size:0.8rem;">
+        Это демо-оплата: средства не списываются. После «Оплатить» статус брони станет «Подтверждена».
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

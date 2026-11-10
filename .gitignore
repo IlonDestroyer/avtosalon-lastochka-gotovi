@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.py[cod]
+*.sqlite3
+db.sqlite3
+staticfiles/
+media/cars/*
+!media/cars/.gitkeep
+.env
+*.log
+.DS_Store

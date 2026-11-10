@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load cars_extras %}
+
+{% block title %}Личный кабинет — «Ласточка»{% endblock %}
+
+{% block content %}
+<div class="container cabinet" style="padding:2rem 0 3rem;">
+  <section>
+    <h1 style="font-size:1.5rem;">Личный кабинет</h1>
+    <p class="muted" style="margin-top:0.25rem;">
+      {% if profile and profile.full_name %}{{ profile.full_name }} · {% endif %}
+      {{ user.email }}
+      {% if profile and profile.phone %} · {{ profile.phone }}{% endif %}
+    </p>
+  </section>
+
+  <section>
+    <h2>Брони</h2>
+    {% if bookings %}
+      {% for b in bookings %}
+      <div class="row-item">
+        <div class="grow">
+          <div>{{ b.car.title }}</div>
+          <div class="muted">предоплата {{ b.deposit_kzt|format_kzt }} · до {{ b.expires_at|date:"d.m.Y" }}</div>
+        </div>
+        <span class="status">{{ b.get_status_display }}</span>
+        {% if b.status != "completed" and b.status != "cancelled" and b.status != "expired" %}
+          <a href="{% url 'payment' b.pk %}" class="btn btn-sm">К оплате</a>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="empty">Броней пока нет. <a href="{% url 'catalog' %}">Выбрать автомобиль</a></p>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>Тест-драйвы</h2>
+    {% if drives %}
+      {% for d in drives %}
+      <div class="row-item">
+        <div class="grow">{{ d.car.title }}</div>
+        <span class="muted">{{ d.scheduled_at|date:"d.m.Y H:i" }}</span>
+        <span class="status">{{ d.get_status_display }}</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="empty">Записей на тест-драйв пока нет.</p>
+    {% endif %}
+  </section>
+
+  <section>
+    <h2>Платежи</h2>
+    {% if payments %}
+      {% for p in payments %}
+      <div class="row-item">
+        <div class="grow">
+          <div>{{ p.car.title }}</div>
+          <div class="muted">заказ {{ p.order_no }} · {{ p.created_at|date:"d.m.Y" }} · {{ p.get_method_display }}</div>
+        </div>
+        <span>{{ p.amount_kzt|format_kzt }}</span>
+        <span class="status status-available">{{ p.get_status_display }}</span>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p class="empty">Платежей пока нет.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

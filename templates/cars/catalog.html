@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load cars_extras %}
+
+{% block title %}Каталог автомобилей — автоцентр «Ласточка»{% endblock %}
+
+{% block content %}
+<section class="hero container">
+  <span class="badge">{{ available_count }} авто в наличии</span>
+  <h1>Каталог премиальных авто</h1>
+  <p>Найдите машину за минуту. Бронирование, тест-драйв и оплата — в одном окне.</p>
+</section>
+
+<section class="container grid-catalog" style="padding-bottom: 3rem;">
+  <aside class="filters">
+    <form method="get">
+      <div class="field">
+        <label>Поиск</label>
+        {{ filter_form.search }}
+      </div>
+      <div class="field">
+        <label>Марка</label>
+        {{ filter_form.brand }}
+      </div>
+      <div class="field">
+        <label>Цена, млн ₸</label>
+        <div style="display:flex;gap:0.5rem;">
+          {{ filter_form.price_from }}
+          {{ filter_form.price_to }}
+        </div>
+      </div>
+      <div class="field">
+        <label>Год выпуска</label>
+        {{ filter_form.year }}
+      </div>
+      <div class="field">
+        <label>Кузов</label>
+        {{ filter_form.body }}
+      </div>
+      <button type="submit" class="btn btn-block">Применить</button>
+      <a href="{% url 'catalog' %}" class="btn btn-secondary btn-block" style="margin-top:0.5rem;text-align:center;">Сбросить</a>
+    </form>
+  </aside>
+
+  <div>
+    {% if cars %}
+    <div class="car-grid">
+      {% for car in cars %}
+      <a href="{% url 'car_detail' car.slug %}" class="card car-card">
+        {% if car.get_image_url %}
+          <img src="{{ car.get_image_url }}" alt="{{ car.title }}">
+        {% else %}
+          <div style="aspect-ratio:16/10;background:var(--surface-2);display:flex;align-items:center;justify-content:center;color:var(--muted);">Нет фото</div>
+        {% endif %}
+        <div class="card-body">
+          <span class="status status-{{ car.status }}">{{ car.get_status_display }}</span>
+          <h3>{{ car.title }}</h3>
+          <div class="meta">{{ car.year }} · {{ car.body }} · {{ car.mileage_km|format_number }} км</div>
+          <div class="price">{{ car.price_kzt|format_kzt }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">←</a>
+      {% endif %}
+      <span class="current">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% for k,v in request.GET.items %}{% if k != 'page' %}&{{ k }}={{ v }}{% endif %}{% endfor %}">→</a>
+      {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <p class="empty">По этим условиям автомобилей нет.</p>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
